@@ -1,4 +1,4 @@
-#modelsDiv *,
-#simulationsDiv * {
+#models *,
+#selectSimulation * {
     display: inline-block;
 }

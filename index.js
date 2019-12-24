@@ -2,6 +2,13 @@ var tart = new Tart("http://localhost:4000/");
 var createSimulationButtons = $("#createSimulation")[0];
 var selectSimulationButtons = $("#simulations")[0];
 
+var simulIdSpan = $("#simulId");
+var simulModelSpan = $("#simulModel");
+var simulMoneySpan = $("#simulMoney");
+var simulMoneyIncSpan = $("#simulMoneyInc");
+var simulMoneyDecSpan = $("#simulMoneyDec");
+var simulTimeSpan = $("#simulTime");
+
 var statTable = $("#statTable")[0];
 
 selectedSimul = -1;
@@ -43,7 +50,23 @@ function loadSimulations() {
 function selectSimulation(i) {
     selectedSimul = i;
 
+    loadSimulationInfo(i);
     loadUpgrades(i);
+}
+
+function loadSimulationInfo(i) {
+    tart.getSimulation(i, simul => {
+        tart.getSimulationModel(i, model => {
+            model = model.name;
+
+            simulIdSpan.html(i.toString());
+            simulModelSpan.html(model);
+            simulMoneySpan.html(simul.money);
+            simulMoneyIncSpan.html(simul.moneyInc);
+            simulMoneyDecSpan.html(simul.moneyDec);
+            simulTimeSpan.html(simul.time);
+        })
+    })
 }
 
 function loadUpgrades(i) {
@@ -88,12 +111,38 @@ function loadUpgrades(i) {
                 columns: columns,
                 nestedHeaders: nestedHeaders,
                 onchange: sheetStatChanged,
+                allowInsertColumn: false,
+                allowManualInsertColumn: false,
+                allowDeleteColumn: false,
             });
         });
     });
 }
 
 function sheetStatChanged(instance, cell, x, y, value) {
+    var data = sheet.getData();
+    var upgrade = Math.floor(x / 2);
+    var maxLevel = 0;
+
+    var prices = [];
+    var values = [];
+
+    for (var y = 0; y < data.length; y++) {
+        var price = parseFloat(data[y][upgrade]);
+        var value = parseFloat(data[y][upgrade + 1]);
+        maxLevel = y + 1;
+
+        values.push(value);
+        if (isNaN(price) || isNaN(value)) {
+            break;
+        }
+        prices.push(price);
+    }
+    var data = { maxLevel: maxLevel, prices: prices, values: values };
+    tart.updateUpgrades(selectedSimul, upgrade, data, simul => {
+        // No need to refresh right now
+        // loadUpgrades(selectedSimul);
+    })
 }
 
 
@@ -122,13 +171,13 @@ var chart = new Chart(chartElem, {
                 gridLines: {
                     display: true,
                     color: "rgba(255,99,132,0.2)"
-              }
+                }
             }],
             xAxes: [{
                 gridLines: {
                     display: false
                 }
             }]
-          }
+        }
     }
 })
