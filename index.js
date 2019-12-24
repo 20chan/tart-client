@@ -2,7 +2,7 @@ var tart = new Tart("http://localhost:4000/");
 var createSimulationButtons = $("#createSimulation")[0];
 
 function loadModels() {
-    createSimulationButtons.innerHtml = "";
+    createSimulationButtons.innerHTML = "";
     tart.getModels(models => {
         for (var i = 0; i < models.length; i++) {
             var btn = $("<button>" + models[i] + "</button>");
@@ -16,7 +16,6 @@ function loadModels() {
 }
 
 function loadSimulations() {
-
 }
 
 var data = [
