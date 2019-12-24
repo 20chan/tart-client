@@ -47,10 +47,11 @@ Tart.prototype.getUpgrade = function(simul, upgrade, callback) {
     $.get(this.url + 'api/simulations/' + simul + '/upgrades/' + upgrade, callback);
 }
 
-Tart.prototype.updateUpgrades = function(simul, upgrade, callback) {
+Tart.prototype.updateUpgrades = function(simul, upgrade, data, callback) {
     $.ajax({
         url: this.url + 'api/simulations/' + simul + '/upgrades/' + upgrade,
         type: 'PUT',
+        data: JSON.stringify(data),
         success: callback
     });
 }
