@@ -1,0 +1,4 @@
+#modelsDiv *,
+#simulationsDiv * {
+    display: inline-block;
+}
