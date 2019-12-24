@@ -2,6 +2,10 @@ var tart = new Tart("http://localhost:4000/");
 var createSimulationButtons = $("#createSimulation")[0];
 var selectSimulationButtons = $("#simulations")[0];
 
+var statTable = $("#statTable")[0];
+
+selectedSimul = -1;
+
 function loadModels() {
     createSimulationButtons.innerHTML = "";
     tart.getModels(models => {
@@ -37,51 +41,66 @@ function loadSimulations() {
 }
 
 function selectSimulation(i) {
+    selectedSimul = i;
 
+    loadUpgrades(i);
 }
+
+function loadUpgrades(i) {
+    tart.getUpgrades(i, upgrades => {
+        tart.getSimulationUpgradeTypes(i, types => {
+            var len = upgrades.length;
+            var maxLevel = 0;
+
+            var data = [];
+            var columns = [];
+            var nestedHeaders = [];
+            for (var i = 0; i < len; i++) {
+                maxLevel = Math.max(upgrades[i].maxLevel);
+
+                columns.push({
+                    title: "Price",
+                    type: "numeric",
+                });
+                columns.push({
+                    title: "Value",
+                    type: "numeric",
+                });
+                nestedHeaders.push({
+                    title: types.names[i],
+                    colspan: "2",
+                });
+            }
+
+            for (var i = 0; i < maxLevel; i++) {
+                var row = [];
+                upgrades.forEach(u => {
+                    row.push(u.prices[i]);
+                    row.push(u.values[i]);
+                });
+                data.push(row);
+            }
+
+            statTable.innerHTML = "";
+            var sheetDiv = $("<div></div>").appendTo(statTable);
+            sheet = sheetDiv.jexcel({
+                data: data,
+                columns: columns,
+                nestedHeaders: nestedHeaders,
+                onchange: sheetStatChanged,
+            });
+        });
+    });
+}
+
+function sheetStatChanged(instance, cell, x, y, value) {
+}
+
 
 loadModels();
 loadSimulations();
 
-var data = [
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-];
-
-var table = document.getElementById("statTable");
-var sheet = jexcel(table, {
-    data: data,
-    columns: [
-        {
-            title: "Price",
-            type: "numeric",
-        },
-        {
-            title: "Value",
-            type: "numeric",
-        },
-        {
-            title: "Price",
-            type: "numeric",
-        },
-        {
-            title: "Value",
-            type: "numeric",
-        },
-    ],
-    nestedHeaders: [
-        {
-            title: "Speed",
-            colspan: "2",
-        },
-        {
-            title: "Money",
-            colspan: "2",
-        },
-    ]
-});
+var sheet = null;
 
 var chartElem = document.getElementById("chart")
 var chart = new Chart(chartElem, {
