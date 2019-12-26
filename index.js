@@ -21,8 +21,18 @@ var simulStats = $("#simulStats")[0];
 var simulChoices = $("#simulChoices")[0];
 var historyList = $("#historyList")[0];
 
-selectedSimul = -1;
-simulAutoTickId = -1;
+var simulatorOn = $("#simulatorOn");
+var simulatorLog = $("#simulatorLog");
+var weightsDisplay = $("#simulatorWeights")[0];
+
+var selectedSimul = -1;
+var simulAutoTickId = -1;
+var runSimulator = false;
+var simulator = new Simulator();
+
+function round(x) {
+    return Math.round(x * 100) / 100;
+}
 
 function loadModels() {
     createSimulationButtons.innerHTML = "";
@@ -95,10 +105,6 @@ function loadSimulationInfo(i) {
         });
         loadChoices();
     });
-
-    function round(x) {
-        return Math.round(x * 100) / 100;
-    }
 
     function addStat(name, value) {
         var p = $("<p>" + name + ": <span>" + value + "</span>" + "</p>");
@@ -218,6 +224,8 @@ function loadChoices() {
                 var c = choices[i];
                 createChoiceButton(i, types[c.type], c.price, c.level, c.nextStats.moneyPerSecond - c.currentStats.moneyPerSecond, c.available);
             }
+
+            console.log(simulator.calculateWeights(choices));
         });
 
         tart.getSimulationHistory(selectedSimul, history => {
@@ -261,8 +269,42 @@ function initTicks() {
 }
 
 function tick() {
-    tart.tickSimulation(selectedSimul, simulTickInterval.value, simul => {
-        loadSimulationInfo(selectedSimul);
+    if (runSimulator) {
+        tart.getChoicesOfSimulation(selectedSimul, choices => {
+            var weights = simulator.calculateWeights(choices);
+            log(simulTimeSpan.html() + ": " + JSON.stringify(weights.map(round)));
+
+            var choice = simulator.update(choices);
+            if (choice === -1) {
+                _tick();
+            }
+            else {
+                log(simulTimeSpan.html() + ": SELECT " + choice);
+                tart.createChoice(selectedSimul, choice, simul => {
+                    _tick();
+                });
+            }
+        });
+    }
+    else {
+        _tick();
+    }
+
+    function _tick() {
+        tart.tickSimulation(selectedSimul, simulTickInterval.value, simul => {
+            loadSimulationInfo(selectedSimul);
+        });
+    }
+
+    function log(value) {
+        simulatorLog.append(value + '\n');
+    }
+}
+
+
+function initSimulator() {
+    simulatorOn.change(() => {
+        runSimulator = simulatorOn[0].checked;
     });
 }
 
@@ -270,6 +312,7 @@ function tick() {
 loadModels();
 loadSimulations();
 initTicks();
+initSimulator();
 
 var sheet = null;
 

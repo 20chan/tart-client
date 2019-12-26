@@ -28,7 +28,7 @@
     <div id="simulationTitle">
         <h3>Simulation #<span id="simulId">-1</span></h3>
     </div>
-    <div class="column" id="leftColumn">
+    <div class="column">
         <div id="simulationInfo">
             <p>model: <span id="simulModel">Example</span></p>
             <p>money:
@@ -42,7 +42,7 @@
             <div id="simulUpgradeTable"></div>
         </div>
     </div>
-    <div class="column" id="middleColumn">
+    <div class="column">
         <div id="simulTick">
             <div id="simluManualTick">
                 <p>interval: </p>
@@ -60,9 +60,22 @@
 
         </div>
     </div>
-    <div class="column" id="rightColumn">
+    <div class="column">
         <div id="simulHistory" class="list">
             <div id="historyList" class="card-list">
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div id="simulator">
+            <div id="simulatorRun">
+                <p style="display: inline-block">run simulator: </p>
+                <input type="checkbox" id="simulatorOn">
+
+                <textarea id="simulatorLog"></textarea>
+            </div>
+            <div id="simulatorWeights">
+
             </div>
         </div>
     </div>
@@ -70,6 +83,7 @@
         <canvas id="chart" width="400" height="200"></canvas>
     </div>
     <script src="tart.js"></script>
+    <script src="simulator.js"></script>
     <script src="index.js"></script>
 </body>
 
