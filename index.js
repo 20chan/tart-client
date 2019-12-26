@@ -120,6 +120,10 @@ function loadUpgrades(i) {
 }
 
 function sheetStatChanged(instance, cell, x, y, value) {
+    if (isNaN(parseFloat(value))) {
+        sheet.setValueFromCoords(x, y, 0);
+        return;
+    }
     var data = sheet.getData();
     var upgrade = Math.floor(x / 2);
     var maxLevel = 0;
