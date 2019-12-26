@@ -228,7 +228,7 @@ function loadChoices() {
     });
 
     function createChoiceButton(index, type, price, level, available) {
-        var btn = $(`<button class="choiceBtn" ${available ? "" : "disabled"}><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}</button>`);
+        var btn = $(`<button class="choiceBtn" ${available ? "" : "disabled"}><span style="font-weight:bold;">${type}</span> (${level})<div></div>$${price}</button>`);
         btn.appendTo(simulChoices).click(() => {
             tart.createChoice(selectedSimul, index, simul => {
                 loadSimulationInfo(selectedSimul);
@@ -237,7 +237,7 @@ function loadChoices() {
     }
 
     function createHistoryChoiceBlock(type, price, level, time) {
-        var div = $(`<div class="card"><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}<div></div>${time}</div>`);
+        var div = $(`<div class="card"><span style="font-weight:bold;">${type}</span> (${level})<div></div>$${price}<div></div>at ${time}</div>`);
         div.appendTo(historyList);
     }
 }
