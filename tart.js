@@ -31,6 +31,10 @@ Tart.prototype.getSimulationModel = function (simul, callback) {
     $.get(this.url + 'api/simulations/' + simul + '/model', callback);
 }
 
+Tart.prototype.getSimulationHistory = function (simul, callback) {
+    $.get(this.url + 'api/simulations/' + simul + '/history', callback);
+}
+
 Tart.prototype.getChoicesOfSimulation = function (simul, callback) {
     $.get(this.url + 'api/simulations/' + simul + '/choices', callback);
 }

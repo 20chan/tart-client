@@ -18,6 +18,7 @@ var autoTick = $("#simulAutoTick");
 
 var simulStats = $("#simulStats")[0];
 var simulChoices = $("#simulChoices")[0];
+var historyList = $("#historyList")[0];
 
 selectedSimul = -1;
 simulAutoTickId = -1;
@@ -208,14 +209,21 @@ function sheetStatChanged(instance, cell, x, y, value) {
 }
 
 function loadChoices() {
-    tart.getChoicesOfSimulation(selectedSimul, choices => {
-        tart.getSimulationUpgradeTypes(selectedSimul, types => {
+    tart.getSimulationUpgradeTypes(selectedSimul, types => {
+        types = types.names;
+        tart.getChoicesOfSimulation(selectedSimul, choices => {
             simulChoices.innerHTML = "";
-            types = types.names;
             for (var i = 0; i < choices.length; i++) {
                 var c = choices[i];
                 createChoiceButton(i, types[c.type], c.price, c.level, c.available);
             }
+        });
+
+        tart.getSimulationHistory(selectedSimul, history => {
+            historyList.innerHTML = "";
+            history.forEach(h => {
+                createHistoryChoiceBlock(types[h.type], h.price, h.level, h.time);
+            });
         });
     });
 
@@ -226,6 +234,11 @@ function loadChoices() {
                 loadSimulationInfo(selectedSimul);
             });
         });
+    }
+
+    function createHistoryChoiceBlock(type, price, level, time) {
+        var div = $(`<div class="card"><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}<div></div>${time}</div>`);
+        div.appendTo(historyList);
     }
 }
 
