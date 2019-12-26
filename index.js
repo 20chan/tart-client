@@ -14,6 +14,7 @@ var simulUpgradeTable = $("#simulUpgradeTable")[0];
 var manualTick = $("#simluManualTick");
 var simulTickInterval = $("#simulTickInterval")[0];
 var tickBtn = $("#tick");
+var tickTimeScale = $("#simulTimeScale")[0];
 var autoTick = $("#simulAutoTick");
 
 var simulStats = $("#simulStats")[0];
@@ -215,7 +216,7 @@ function loadChoices() {
             simulChoices.innerHTML = "";
             for (var i = 0; i < choices.length; i++) {
                 var c = choices[i];
-                createChoiceButton(i, types[c.type], c.price, c.level, c.available);
+                createChoiceButton(i, types[c.type], c.price, c.level, c.nextStats.moneyPerSecond - c.currentStats.moneyPerSecond, c.available);
             }
         });
 
@@ -227,8 +228,8 @@ function loadChoices() {
         });
     });
 
-    function createChoiceButton(index, type, price, level, available) {
-        var btn = $(`<button class="choiceBtn" ${available ? "" : "disabled"}><span style="font-weight:bold;">${type}</span> (${level})<div></div>$${price}</button>`);
+    function createChoiceButton(index, type, price, level, mpsDelta, available) {
+        var btn = $(`<button class="choiceBtn" ${available ? "" : "disabled"}><span style="font-weight:bold;">${type}</span> (${level})<div></div>$${price}<div></div>estimate dps += ${mpsDelta}</button>`);
         btn.appendTo(simulChoices).click(() => {
             tart.createChoice(selectedSimul, index, simul => {
                 loadSimulationInfo(selectedSimul);
@@ -250,7 +251,7 @@ function initTicks() {
     autoTick.change(() => {
         if (autoTick[0].checked) {
             manualTick.addClass("disabled");
-            simulAutoTickId = setInterval(tick, simulTickInterval.value);
+            simulAutoTickId = setInterval(tick, simulTickInterval.value / tickTimeScale.value);
         }
         else {
             clearInterval(simulAutoTickId);
