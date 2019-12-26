@@ -9,7 +9,13 @@ var simulMoneyIncSpan = $("#simulMoneyInc");
 var simulMoneyDecSpan = $("#simulMoneyDec");
 var simulTimeSpan = $("#simulTime");
 
-var statTable = $("#statTable")[0];
+var simulUpgradeTable = $("#simulUpgradeTable")[0];
+
+var simulTickInterval = $("#simulTickInterval")[0];
+var tickBtn = $("#tick");
+
+var simulStats = $("#simulStats")[0];
+var simulChoices = $("#simulChoices")[0];
 
 selectedSimul = -1;
 
@@ -50,8 +56,8 @@ function loadSimulations() {
 function selectSimulation(i) {
     selectedSimul = i;
 
-    loadSimulationInfo(i);
     loadUpgrades(i);
+    loadSimulationInfo(i);
 }
 
 function loadSimulationInfo(i) {
@@ -65,8 +71,44 @@ function loadSimulationInfo(i) {
             simulMoneyIncSpan.html(simul.moneyInc);
             simulMoneyDecSpan.html(simul.moneyDec);
             simulTimeSpan.html(simul.time);
-        })
-    })
+
+            tart.getSimulationUpgradeTypes(i, types => {
+                types = types.names;
+                simulStats.innerHTML = "";
+                resetSheetStyles();
+
+                for (var i = 0; i < types.length; i++) {
+                    var levelInfo = $("<p>" + types[i] + ": <span>" + simul.levels[i] + "</span>" + "</p>");
+                    levelInfo.appendTo(simulStats);
+                    highlightSheetByLevel(i, simul.levels[i]);
+                }
+            });
+        });
+        loadChoices();
+    });
+
+    function highlightSheetByLevel(i, level) {
+        level += 1;
+        var cell0 = String.fromCharCode('A'.charCodeAt('0') + i * 2) + level;
+        var cell1 = String.fromCharCode('A'.charCodeAt('0') + i * 2 + 1) + level;
+        var dict = {};
+        dict[cell0] = dict[cell1] = 'background-color: orange;';
+        sheet.setStyle(dict);
+    }
+}
+
+function resetSheetStyles() {
+    var headerLen = sheet.headers.length;
+    var rowLen = sheet.rows.length;
+
+    for (var i = 0; i < headerLen; i++) {
+        for (var j = 0; j < rowLen; j++) {
+            var cell = String.fromCharCode('A'.charCodeAt('0') + i) + (j + 1);
+            var dict = {};
+            dict[cell] = 'background-color: transparent;';
+            sheet.setStyle(dict);
+        }
+    }
 }
 
 function loadUpgrades(i) {
@@ -104,8 +146,8 @@ function loadUpgrades(i) {
                 data.push(row);
             }
 
-            statTable.innerHTML = "";
-            var sheetDiv = $("<div></div>").appendTo(statTable);
+            simulUpgradeTable.innerHTML = "";
+            var sheetDiv = $("<div></div>").appendTo(simulUpgradeTable);
             sheet = sheetDiv.jexcel({
                 data: data,
                 columns: columns,
@@ -146,12 +188,44 @@ function sheetStatChanged(instance, cell, x, y, value) {
     tart.updateUpgrades(selectedSimul, upgrade, data, simul => {
         // No need to refresh right now
         // loadUpgrades(selectedSimul);
+    });
+}
+
+function loadChoices() {
+    tart.getChoicesOfSimulation(selectedSimul, choices => {
+        tart.getSimulationUpgradeTypes(selectedSimul, types => {
+            simulChoices.innerHTML = "";
+            types = types.names;
+            for (var i = 0; i < choices.length; i++) {
+                var c = choices[i];
+                createChoiceButton(i, types[c.type], c.price, c.level);
+            }
+        });
+    });
+
+    function createChoiceButton(index, type, price, level) {
+        var btn = $(`<button class="choiceBtn"><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}</button>`);
+        btn.appendTo(simulChoices).click(() => {
+            tart.createChoice(selectedSimul, index, simul => {
+                loadSimulationInfo(selectedSimul);
+            });
+        });
+    }
+}
+
+function initTicks() {
+    tickBtn.click(() => {
+        var interval =  simulTickInterval.value;
+        tart.tickSimulation(selectedSimul, interval, simul => {
+            loadSimulationInfo(selectedSimul);
+        })
     })
 }
 
 
 loadModels();
 loadSimulations();
+initTicks();
 
 var sheet = null;
 

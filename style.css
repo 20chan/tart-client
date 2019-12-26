@@ -2,3 +2,19 @@
 #selectSimulation * {
     display: inline-block;
 }
+
+.column {
+    float: left;
+    margin-right: 20px;
+}
+
+#simulTick p {
+    display: inline-block;
+}
+
+.choiceBtn {
+    display: block;
+    margin-bottom: 6px;
+    width: 200px;
+    height: 40px;
+}

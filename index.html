@@ -13,7 +13,7 @@
 
 <body>
     <div id="title">
-        <h2>tart simul</h2>
+        <h1>tart simul</h1>
     </div>
     <div id="models">
         <p>create new simulation: </p>
@@ -29,20 +29,37 @@
             <button>a</button>
         </div>
     </div>
-    <div id="simulationInfo">
+    <div id="simulationTitle">
         <h3>Simulation #<span id="simulId">0</span></h3>
-        <p>model: <span id="simulModel">Example</span></p>
-        <p>money:
-            <span id="simulMoney">1000</span>
-            <span id="simulMoneyInc">300</span>
-            <span id="simulMoneyDec">300</span>
-        </p>
-        <p>time: <span id="simulTime">100</span></p>
     </div>
-    <div id="stats">
-        <div id="statTable"></div>
+    <div class="column" id="leftColumn">
+        <div id="simulationInfo">
+            <p>model: <span id="simulModel">Example</span></p>
+            <p>money:
+                <span id="simulMoney">1000</span>
+                <span id="simulMoneyInc">300</span>
+                <span id="simulMoneyDec">300</span>
+            </p>
+            <p>time: <span id="simulTime">100</span></p>
+        </div>
+        <div id="simulUpgrades">
+            <div id="simulUpgradeTable"></div>
+        </div>
     </div>
-    <div id="charts">
+    <div class="column" id="middleColumn">
+        <div id="simulTick">
+            <p>interval: </p>
+            <input type="number" min="0" step="100" value = "100" id="simulTickInterval">
+            <button id="tick">tick</button>
+        </div>
+        <div id="simulStats">
+
+        </div>
+        <div id="simulChoices">
+
+        </div>
+    </div>
+    <div id="charts" style="visibility: hidden;">
         <canvas id="chart" width="400" height="200"></canvas>
     </div>
     <script src="tart.js"></script>
