@@ -18,3 +18,8 @@
     width: 200px;
     height: 40px;
 }
+
+div.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}

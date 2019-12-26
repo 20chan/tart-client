@@ -11,13 +11,16 @@ var simulTimeSpan = $("#simulTime");
 
 var simulUpgradeTable = $("#simulUpgradeTable")[0];
 
+var manualTick = $("#simluManualTick");
 var simulTickInterval = $("#simulTickInterval")[0];
 var tickBtn = $("#tick");
+var autoTick = $("#simulAutoTick");
 
 var simulStats = $("#simulStats")[0];
 var simulChoices = $("#simulChoices")[0];
 
 selectedSimul = -1;
+simulAutoTickId = -1;
 
 function loadModels() {
     createSimulationButtons.innerHTML = "";
@@ -55,6 +58,9 @@ function loadSimulations() {
 
 function selectSimulation(i) {
     selectedSimul = i;
+    clearInterval(simulAutoTickId);
+    autoTick[0].checked = false;
+    manualTick.removeClass("disabled");
 
     loadUpgrades(i);
     loadSimulationInfo(i);
@@ -67,10 +73,10 @@ function loadSimulationInfo(i) {
 
             simulIdSpan.html(i.toString());
             simulModelSpan.html(model);
-            simulMoneySpan.html(simul.money);
-            simulMoneyIncSpan.html(simul.moneyInc);
-            simulMoneyDecSpan.html(simul.moneyDec);
-            simulTimeSpan.html(simul.time);
+            simulMoneySpan.html(round(simul.money));
+            simulMoneyIncSpan.html(round(simul.moneyInc));
+            simulMoneyDecSpan.html(round(simul.moneyDec));
+            simulTimeSpan.html(round(simul.time));
 
             tart.getSimulationUpgradeTypes(i, types => {
                 types = types.names;
@@ -78,14 +84,24 @@ function loadSimulationInfo(i) {
                 resetSheetStyles();
 
                 for (var i = 0; i < types.length; i++) {
-                    var levelInfo = $("<p>" + types[i] + ": <span>" + simul.levels[i] + "</span>" + "</p>");
-                    levelInfo.appendTo(simulStats);
+                    addStat(types[i], simul.levels[i]);
                     highlightSheetByLevel(i, simul.levels[i]);
                 }
+
+                addStat("money/s", simul.stats.moneyPerSecond);
             });
         });
         loadChoices();
     });
+
+    function round(x) {
+        return Math.round(x * 100) / 100;
+    }
+
+    function addStat(name, value) {
+        var p = $("<p>" + name + ": <span>" + value + "</span>" + "</p>");
+        p.appendTo(simulStats);
+    }
 
     function highlightSheetByLevel(i, level) {
         level += 1;
@@ -137,7 +153,7 @@ function loadUpgrades(i) {
                 });
             }
 
-            for (var i = 0; i < maxLevel; i++) {
+            for (var i = 0; i < maxLevel + 1; i++) {
                 var row = [];
                 upgrades.forEach(u => {
                     row.push(u.prices[i]);
@@ -162,7 +178,7 @@ function loadUpgrades(i) {
 }
 
 function sheetStatChanged(instance, cell, x, y, value) {
-    if (isNaN(parseFloat(value))) {
+    if (value !== '' && isNaN(parseFloat(value))) {
         sheet.setValueFromCoords(x, y, 0);
         return;
     }
@@ -174,8 +190,8 @@ function sheetStatChanged(instance, cell, x, y, value) {
     var values = [];
 
     for (var y = 0; y < data.length; y++) {
-        var price = parseFloat(data[y][upgrade]);
-        var value = parseFloat(data[y][upgrade + 1]);
+        var price = parseFloat(data[y][upgrade * 2]);
+        var value = parseFloat(data[y][upgrade * 2 + 1]);
         maxLevel = y + 1;
 
         values.push(value);
@@ -198,13 +214,13 @@ function loadChoices() {
             types = types.names;
             for (var i = 0; i < choices.length; i++) {
                 var c = choices[i];
-                createChoiceButton(i, types[c.type], c.price, c.level);
+                createChoiceButton(i, types[c.type], c.price, c.level, c.available);
             }
         });
     });
 
-    function createChoiceButton(index, type, price, level) {
-        var btn = $(`<button class="choiceBtn"><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}</button>`);
+    function createChoiceButton(index, type, price, level, available) {
+        var btn = $(`<button class="choiceBtn" ${available ? "" : "disabled"}><span style="font-weight:bold;">${type}</span> (${level})<div></div>${price}</button>`);
         btn.appendTo(simulChoices).click(() => {
             tart.createChoice(selectedSimul, index, simul => {
                 loadSimulationInfo(selectedSimul);
@@ -215,11 +231,25 @@ function loadChoices() {
 
 function initTicks() {
     tickBtn.click(() => {
-        var interval =  simulTickInterval.value;
-        tart.tickSimulation(selectedSimul, interval, simul => {
-            loadSimulationInfo(selectedSimul);
-        })
-    })
+        tick();
+    });
+
+    autoTick.change(() => {
+        if (autoTick[0].checked) {
+            manualTick.addClass("disabled");
+            simulAutoTickId = setInterval(tick, simulTickInterval.value);
+        }
+        else {
+            clearInterval(simulAutoTickId);
+            manualTick.removeClass("disabled");
+        }
+    });
+}
+
+function tick() {
+    tart.tickSimulation(selectedSimul, simulTickInterval.value, simul => {
+        loadSimulationInfo(selectedSimul);
+    });
 }
 
 

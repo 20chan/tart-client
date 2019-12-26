@@ -18,19 +18,15 @@
     <div id="models">
         <p>create new simulation: </p>
         <div id="createSimulation">
-            <button>abcd</button>
-            <button>a</button>
         </div>
     </div>
     <div id="selectSimulation">
         <p>select simulation: </p>
         <div id="simulations">
-            <button>abcd</button>
-            <button>a</button>
         </div>
     </div>
     <div id="simulationTitle">
-        <h3>Simulation #<span id="simulId">0</span></h3>
+        <h3>Simulation #<span id="simulId">-1</span></h3>
     </div>
     <div class="column" id="leftColumn">
         <div id="simulationInfo">
@@ -48,9 +44,13 @@
     </div>
     <div class="column" id="middleColumn">
         <div id="simulTick">
-            <p>interval: </p>
-            <input type="number" min="0" step="100" value = "100" id="simulTickInterval">
-            <button id="tick">tick</button>
+            <div id="simluManualTick">
+                <p>interval: </p>
+                <input type="number" min="0" step="100" value = "100" id="simulTickInterval">
+                <button id="tick">tick</button>
+            </div>
+            <p style="display: inline-block">auto ticks: </p>
+            <input type="checkbox" id="simulAutoTick">
         </div>
         <div id="simulStats">
 
